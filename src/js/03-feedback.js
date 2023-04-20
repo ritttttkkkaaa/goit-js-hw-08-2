@@ -1,32 +1,39 @@
 import throttle from 'lodash.throttle';
 
-const form = document.querySelector('.feedback-form');
+const form = document.getElementsByClassName('feedback-form')[0];
+const emailInput = document.getElementsByName('email')[0];
+const messageInput = document.getElementsByName('message')[0];
 
-form.addEventListener('input', throttle(onFormInput, 500));
-form.addEventListener('submit', onFormSubmit);
+form.addEventListener('input', throttle(saveDataFunc, 500));
 
-let objects = JSON.parse(localStorage.getItem('feedback-form-state')) || {};
-const { email, message } = form.elements;
-
-function onFormInput() {
-  objects = { email: email.value, message: message.value };
-  localStorage.setItem('feedback-form-state', JSON.stringify(objects));
-  console.log(objects);
+function saveDataFunc() {
+  const data = {
+    email: emailInput.value,
+    message: messageInput.value,
+  };
+  localStorage.setItem('feedback-form-state', JSON.stringify(data));
 }
 
-function onFormSubmit(event) {
-  event.preventDefault();
-  console.log('Submit');
-  event.currentTarget.reset();
+const getDataFromStorage = localStorage.getItem('feedback-form-state');
+const parsedDataFromStorage = JSON.parse(getDataFromStorage);
+
+if (getDataFromStorage) {
+  emailInput.value = parsedDataFromStorage.email;
+  messageInput.value = parsedDataFromStorage.message;
+} else {
+  emailInput.value = '';
+  messageInput.value = '';
+}
+
+form.addEventListener('submit', onSubmitFunc);
+function onSubmitFunc(e) {
+  e.preventDefault();
+  const result = {
+    email: emailInput.value,
+    message: messageInput.value,
+  };
+  console.log(result);
+  emailInput.value = '';
+  messageInput.value = '';
   localStorage.removeItem('feedback-form-state');
-  objects = {};
-}
-
-formFields();
-
-function formFields() {
-  if (objects) {
-    email.value = objects.email || '';
-    message.value = objects.message || '';
-  }
 }
